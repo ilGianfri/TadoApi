@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,13 +7,13 @@ namespace KoenZomers.Tado.Api.Entities
         /// <summary>
         /// The current state of the Tado device
         /// </summary>
-        [JsonProperty("setting")]
+        [JsonPropertyName("setting")]
         public Setting Setting { get; set; }
 
         /// <summary>
         /// Information on when the current state of the Tado device will end
         /// </summary>
-        [JsonProperty("termination")]
+        [JsonPropertyName("termination")]
         public Termination Termination { get; set; }
     }
 }

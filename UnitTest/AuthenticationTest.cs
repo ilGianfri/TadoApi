@@ -16,7 +16,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task AuthenticateSuccessTest()
         {
-            var session = new Session(Username, Password);
+            Session session = new(Username, Password);
 
             await session.Authenticate();
             Assert.IsNotNull(session.AuthenticatedSession, "Failed to authenticate");
@@ -30,7 +30,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [ExpectedException(typeof(Exceptions.SessionAuthenticationFailedException))]
         public async Task AuthenticateFailTest()
         {
-            var session = new Session("test@test.com", "someinvalidpassword");
+            Session session = new("test@test.com", "someinvalidpassword");
             await session.Authenticate();
         }
 
@@ -41,7 +41,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [ExpectedException(typeof(Exceptions.SessionNotAuthenticatedException))]
         public async Task UnauthenticatedTest()
         {
-            var session = new Session(Username, Password);
+            Session session = new(Username, Password);
             await session.GetMe();
         }
     }

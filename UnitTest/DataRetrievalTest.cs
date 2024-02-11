@@ -41,7 +41,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetMeTest()
         {
-            var response = await session.GetMe();
+            Entities.User response = await session.GetMe();
             Assert.IsNotNull(response, "Failed to retrieve information about the current user");
         }
 
@@ -51,7 +51,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetZonesTest()
         {
-            var response = await session.GetZones(HomeId);
+            Entities.Zone[] response = await session.GetZones(HomeId);
             Assert.IsNotNull(response, "Failed to retrieve information about the zones");
         }
 
@@ -61,7 +61,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetDevicesTest()
         {
-            var response = await session.GetDevices(HomeId);
+            Entities.Device[] response = await session.GetDevices(HomeId);
             Assert.IsNotNull(response, "Failed to retrieve information about the Tado devices");
         }
 
@@ -71,7 +71,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetMobileDevicesTest()
         {
-            var response = await session.GetMobileDevices(HomeId);
+            Entities.MobileDevice.Item[] response = await session.GetMobileDevices(HomeId);
             Assert.IsNotNull(response, "Failed to retrieve information about the mobile devices");
         }
 
@@ -81,7 +81,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetInstallationsTest()
         {
-            var response = await session.GetInstallations(HomeId);
+            Entities.Installation[] response = await session.GetInstallations(HomeId);
             Assert.IsNotNull(response, "Failed to retrieve information about the installations");
         }
 
@@ -91,7 +91,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetZoneStateTest()
         {
-            var response = await session.GetZoneState(HomeId, ZoneId);
+            Entities.State response = await session.GetZoneState(HomeId, ZoneId);
             Assert.IsNotNull(response, "Failed to retrieve information about the state of the zone");
         }
 
@@ -101,7 +101,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetHomeStateTest()
         {
-            var response = await session.GetHomeState(HomeId);
+            Entities.HomeState response = await session.GetHomeState(HomeId);
             Assert.IsNotNull(response, "Failed to retrieve information about the home state");
         }
 
@@ -111,7 +111,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetSummarizedZoneStateTest()
         {
-            var response = await session.GetSummarizedZoneState(HomeId, ZoneId);
+            Entities.ZoneSummary response = await session.GetSummarizedZoneState(HomeId, ZoneId);
             Assert.IsNotNull(response, "Failed to retrieve information about the summarized state of the zone");
         }
 
@@ -121,7 +121,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetWeatherTest()
         {
-            var response = await session.GetWeather(HomeId);
+            Entities.Weather response = await session.GetWeather(HomeId);
             Assert.IsNotNull(response, "Failed to retrieve information about the current weather at the house");
         }
 
@@ -131,7 +131,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetHomeTest()
         {
-            var response = await session.GetHome(HomeId);
+            Entities.House response = await session.GetHome(HomeId);
 
             Assert.IsNotNull(response, "Failed to retrieve information about the house");
         }
@@ -142,7 +142,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetUsersTest()
         {
-            var response = await session.GetUsers(HomeId);
+            Entities.User[] response = await session.GetUsers(HomeId);
 
             Assert.IsNotNull(response, "Failed to retrieve information about the users with access to a house");
         }
@@ -153,7 +153,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetMobileDeviceSettingsTest()
         {
-            var response = await session.GetMobileDeviceSettings(HomeId, MobileDeviceId);
+            Entities.MobileDevice.Settings response = await session.GetMobileDeviceSettings(HomeId, MobileDeviceId);
 
             Assert.IsNotNull(response, "Failed to retrieve information about the settings of a mobile device registered to a house");
         }
@@ -164,7 +164,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetZoneCapabilitiesTest()
         {
-            var response = await session.GetZoneCapabilities(HomeId, ZoneId);
+            Entities.Capability response = await session.GetZoneCapabilities(HomeId, ZoneId);
 
             Assert.IsNotNull(response, "Failed to retrieve information about the capabilities of a zone");
         }
@@ -175,7 +175,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task GetEarlyStartTest()
         {
-            var response = await session.GetEarlyStart(HomeId, ZoneId);
+            Entities.EarlyStart response = await session.GetEarlyStart(HomeId, ZoneId);
 
             Assert.IsNotNull(response, "Failed to retrieve information about the early start setting of a zone");
         }

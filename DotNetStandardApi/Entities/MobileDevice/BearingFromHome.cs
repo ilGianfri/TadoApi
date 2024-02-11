@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities.MobileDevice
 {
@@ -7,10 +7,10 @@ namespace KoenZomers.Tado.Api.Entities.MobileDevice
     /// </summary>
     public partial class BearingFromHome
     {
-        [JsonProperty("degrees")]
+        [JsonPropertyName("degrees")]
         public double Degrees { get; set; }
 
-        [JsonProperty("radians")]
+        [JsonPropertyName("radians")]
         public double Radians { get; set; }
     }
 }

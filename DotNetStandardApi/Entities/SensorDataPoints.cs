@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,10 +7,10 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public partial class SensorDataPoints
     {
-        [JsonProperty("insideTemperature")]
+        [JsonPropertyName("insideTemperature")]
         public InsideTemperature InsideTemperature { get; set; }
 
-        [JsonProperty("humidity")]
+        [JsonPropertyName("humidity")]
         public Humidity Humidity { get; set; }
     }
 }

@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
     public class ActivityDataPoints
     {
-        [JsonProperty("heatingPower")]
+        [JsonPropertyName("heatingPower")]
         public HeatingPower HeatingPower { get; set; }
     }
 }

@@ -1,22 +1,22 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
     public partial class OutsideTemperature
     {
-        [JsonProperty("celsius")]
+        [JsonPropertyName("celsius")]
         public double Celsius { get; set; }
 
-        [JsonProperty("fahrenheit")]
+        [JsonPropertyName("fahrenheit")]
         public double Fahrenheit { get; set; }
 
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public System.DateTime Timestamp { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string PurpleType { get; set; }
 
-        [JsonProperty("precision")]
+        [JsonPropertyName("precision")]
         public Precision Precision { get; set; }
     }
 }

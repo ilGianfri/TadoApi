@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace KoenZomers.Tado.Api
 {
@@ -25,27 +26,27 @@ namespace KoenZomers.Tado.Api
         /// <summary>
         /// Base Uri with which all Tado API requests start
         /// </summary>
-        public Uri TadoApiBaseUrl => new Uri("https://my.tado.com/api/v2/");
+        public static Uri TadoApiBaseUrl => new("https://my.tado.com/api/v2/");
 
         /// <summary>
         /// Tado API Uri to authenticate against
         /// </summary>
-        public Uri TadoApiAuthUrl => new Uri("https://auth.tado.com/oauth/token");
+        public static Uri TadoApiAuthUrl => new("https://auth.tado.com/oauth/token");
 
         /// <summary>
         /// Tado API Client Id to use for the OAuth token
         /// </summary>
-        public string ClientId => "public-api-preview";
+        public static string ClientId => "public-api-preview";
 
         /// <summary>
         /// Tado API Client Secret to use for the OAuth token
         /// </summary>
-        public string ClientSecret => "4HJGRffVR8xb3XdEUQpjgZ1VplJi6Xgw";
+        public static string ClientSecret => "4HJGRffVR8xb3XdEUQpjgZ1VplJi6Xgw";
 
         /// <summary>
         /// Allows setting an User Agent which will be provided to the Tado API
         /// </summary>
-        public string UserAgent => "";
+        public static string UserAgent => "";
 
         private IWebProxy proxyConfiguration;
         /// <summary>
@@ -107,6 +108,8 @@ namespace KoenZomers.Tado.Api
         /// </summary>
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
+            
             _httpClient?.Dispose();
         }
 
@@ -164,7 +167,7 @@ namespace KoenZomers.Tado.Api
         private async Task<Entities.Session> GetNewSession()
         {
             // Build the POST body with the authentication arguments
-            var queryBuilder = new Helpers.QueryStringBuilder();
+            Helpers.QueryStringBuilder queryBuilder = new();
             queryBuilder.Add("client_id", ClientId);
             queryBuilder.Add("grant_type", "password");
             queryBuilder.Add("client_secret", ClientSecret);
@@ -182,7 +185,7 @@ namespace KoenZomers.Tado.Api
         private async Task<Entities.Session> GetRefreshedSession()
         {
             // Build the POST body with the authentication arguments
-            var queryBuilder = new Helpers.QueryStringBuilder();
+            Helpers.QueryStringBuilder queryBuilder = new();
             queryBuilder.Add("client_id", ClientId);
             queryBuilder.Add("grant_type", "refresh_token");
             queryBuilder.Add("client_secret", ClientSecret);
@@ -219,7 +222,7 @@ namespace KoenZomers.Tado.Api
         private HttpClient CreateHttpClient()
         {
             // Define the HttpClient settings
-            var httpClientHandler = new HttpClientHandler
+            HttpClientHandler httpClientHandler = new()
             {
                 UseDefaultCredentials = ProxyCredential == null,
                 Proxy = ProxyConfiguration,
@@ -236,7 +239,7 @@ namespace KoenZomers.Tado.Api
             }
 
             // Create the new HTTP Client
-            var httpClient = new HttpClient(httpClientHandler);
+            HttpClient httpClient = new(httpClientHandler);
             
             if (!string.IsNullOrEmpty(UserAgent))
             {
@@ -257,10 +260,7 @@ namespace KoenZomers.Tado.Api
         /// <returns>Object of type T with the parsed response</returns>
         private async Task<T> PostMessageGetResponse<T>(Uri uri, Helpers.QueryStringBuilder queryBuilder, bool requiresAuthenticatedSession)
         {
-            if (uri == null)
-            {
-                throw new ArgumentNullException("Uri has not been provided");
-            }
+            ArgumentNullException.ThrowIfNull(uri);
 
             if (requiresAuthenticatedSession)
             {
@@ -269,37 +269,33 @@ namespace KoenZomers.Tado.Api
             }
 
             // Prepare the content to POST
-            using (var content = new StringContent(queryBuilder.ToString(), Encoding.UTF8, "application/x-www-form-urlencoded"))
+            using StringContent content = new(queryBuilder.ToString(), Encoding.UTF8, "application/x-www-form-urlencoded");
+            // Construct the message towards the webservice
+            using HttpRequestMessage request = new(HttpMethod.Post, uri);
+            // Set the content to send along in the message body with the request
+            request.Content = content;
+
+            try
             {
-                // Construct the message towards the webservice
-                using (var request = new HttpRequestMessage(HttpMethod.Post, uri))
+                // Request the response from the webservice
+                HttpResponseMessage response = await _httpClient.SendAsync(request);
+                string responseBody = await response.Content.ReadAsStringAsync();
+
+                // Verify if the request was successful (response status 200-299)
+                if (response.IsSuccessStatusCode)
                 {
-                    // Set the content to send along in the message body with the request
-                    request.Content = content;
-
-                    try
-                    {
-                        // Request the response from the webservice
-                        var response = await _httpClient.SendAsync(request);
-                        var responseBody = await response.Content.ReadAsStringAsync();
-
-                        // Verify if the request was successful (response status 200-299)
-                        if (response.IsSuccessStatusCode)
-                        {
-                            // Request was successful
-                            var responseEntity = JsonConvert.DeserializeObject<T>(responseBody);
-                            return responseEntity;
-                        }
-                    }
-                    catch(Exception ex)
-                    {
-                        throw new Exceptions.RequestFailedException(uri, ex);
-                    }
-
-                    // Request was not successful. throw an exception
-                    throw new Exceptions.RequestFailedException(uri);
+                    // Request was successful
+                    T responseEntity = JsonSerializer.Deserialize<T>(responseBody);
+                    return responseEntity;
                 }
             }
+            catch (Exception ex)
+            {
+                throw new Exceptions.RequestFailedException(uri, ex);
+            }
+
+            // Request was not successful. throw an exception
+            throw new Exceptions.RequestFailedException(uri);
         }
 
         /// <summary>
@@ -315,27 +311,23 @@ namespace KoenZomers.Tado.Api
             await EnsureAccessToken();
 
             // Construct the request towards the webservice
-            using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
+            using HttpRequestMessage request = new(HttpMethod.Get, uri);
+            try
             {
-                try
+                // Request the response from the webservice
+                using HttpResponseMessage response = await _httpClient.SendAsync(request);
+                if (!expectedHttpStatusCode.HasValue || (expectedHttpStatusCode.HasValue && response != null && response.StatusCode == expectedHttpStatusCode.Value))
                 {
-                    // Request the response from the webservice
-                    using (var response = await _httpClient.SendAsync(request))
-                    {
-                        if (!expectedHttpStatusCode.HasValue || (expectedHttpStatusCode.HasValue && response != null && response.StatusCode == expectedHttpStatusCode.Value))
-                        {
-                            var responseString = await response.Content.ReadAsStringAsync();
-                            var responseEntity = JsonConvert.DeserializeObject<T>(responseString);
-                            return responseEntity;
-                        }
-                        return default(T);
-                    }
+                    string responseString = await response.Content.ReadAsStringAsync();
+                    T responseEntity = JsonSerializer.Deserialize<T>(responseString);
+                    return responseEntity;
                 }
-                catch (Exception ex)
-                {
-                    // Request was not successful. throw an exception
-                    throw new Exceptions.RequestFailedException(uri, ex);
-                }
+                return default;
+            }
+            catch (Exception ex)
+            {
+                // Request was not successful. throw an exception
+                throw new Exceptions.RequestFailedException(uri, ex);
             }
         }
 
@@ -354,38 +346,32 @@ namespace KoenZomers.Tado.Api
             await EnsureAccessToken();
 
             // Load the content to send in the body
-            using (var content = new StringContent(bodyText ?? "", Encoding.UTF8, "application/json"))
+            using StringContent content = new(bodyText ?? "", Encoding.UTF8, "application/json");
+            // Construct the message towards the webservice
+            using HttpRequestMessage request = new(httpMethod, uri);
+            // Check if a body to send along with the request has been provided
+            if (!string.IsNullOrEmpty(bodyText) && httpMethod != HttpMethod.Get)
             {
-                // Construct the message towards the webservice
-                using (var request = new HttpRequestMessage(httpMethod, uri))
-                {
-                    // Check if a body to send along with the request has been provided
-                    if (!string.IsNullOrEmpty(bodyText) && httpMethod != HttpMethod.Get)
-                    {
-                        // Set the content to send along in the message body with the request
-                        request.Content = content;
-                    }
+                // Set the content to send along in the message body with the request
+                request.Content = content;
+            }
 
-                    try
-                    {
-                        // Request the response from the webservice
-                        using (var response = await _httpClient.SendAsync(request))
-                        {
-                            if (!expectedHttpStatusCode.HasValue || (expectedHttpStatusCode.HasValue && response != null && response.StatusCode == expectedHttpStatusCode.Value))
-                            {
-                                var responseString = await response.Content.ReadAsStringAsync();
-                                var responseEntity = JsonConvert.DeserializeObject<T>(responseString);
-                                return responseEntity;
-                            }
-                            return default(T);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Request was not successful. throw an exception
-                        throw new Exceptions.RequestFailedException(uri, ex);
-                    }
+            try
+            {
+                // Request the response from the webservice
+                using HttpResponseMessage response = await _httpClient.SendAsync(request);
+                if (!expectedHttpStatusCode.HasValue || (expectedHttpStatusCode.HasValue && response != null && response.StatusCode == expectedHttpStatusCode.Value))
+                {
+                    string responseString = await response.Content.ReadAsStringAsync();
+                    T responseEntity = JsonSerializer.Deserialize<T>(responseString);
+                    return responseEntity;
                 }
+                return default;
+            }
+            catch (Exception ex)
+            {
+                // Request was not successful. throw an exception
+                throw new Exceptions.RequestFailedException(uri, ex);
             }
         }
 
@@ -403,36 +389,30 @@ namespace KoenZomers.Tado.Api
             await EnsureAccessToken();
 
             // Load the content to send in the body
-            using (var content = new StringContent(bodyText ?? "", Encoding.UTF8, "application/json"))
+            using StringContent content = new(bodyText ?? "", Encoding.UTF8, "application/json");
+            // Construct the message towards the webservice
+            using HttpRequestMessage request = new(httpMethod, uri);
+            // Check if a body to send along with the request has been provided
+            if (!string.IsNullOrEmpty(bodyText) && httpMethod != HttpMethod.Get)
             {
-                // Construct the message towards the webservice
-                using (var request = new HttpRequestMessage(httpMethod, uri))
-                {
-                    // Check if a body to send along with the request has been provided
-                    if (!string.IsNullOrEmpty(bodyText) && httpMethod != HttpMethod.Get)
-                    {
-                        // Set the content to send along in the message body with the request
-                        request.Content = content;
-                    }
+                // Set the content to send along in the message body with the request
+                request.Content = content;
+            }
 
-                    try
-                    {
-                        // Request the response from the webservice
-                        using (var response = await _httpClient.SendAsync(request))
-                        {
-                            if (!expectedHttpStatusCode.HasValue || (expectedHttpStatusCode.HasValue && response != null && response.StatusCode == expectedHttpStatusCode.Value))
-                            {
-                                return true;
-                            }
-                            return false;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Request was not successful. throw an exception
-                        throw new Exceptions.RequestFailedException(uri, ex);
-                    }
+            try
+            {
+                // Request the response from the webservice
+                using HttpResponseMessage response = await _httpClient.SendAsync(request);
+                if (!expectedHttpStatusCode.HasValue || (expectedHttpStatusCode.HasValue && response != null && response.StatusCode == expectedHttpStatusCode.Value))
+                {
+                    return true;
                 }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // Request was not successful. throw an exception
+                throw new Exceptions.RequestFailedException(uri, ex);
             }
         }
 
@@ -448,7 +428,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.User>(new Uri(TadoApiBaseUrl, "me"), HttpStatusCode.OK);
+            Entities.User response = await GetMessageReturnResponse<Entities.User>(new Uri(TadoApiBaseUrl, "me"), HttpStatusCode.OK);
             return response;
         }
 
@@ -461,7 +441,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.Zone[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones"), HttpStatusCode.OK);
+            Entities.Zone[] response = await GetMessageReturnResponse<Entities.Zone[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones"), HttpStatusCode.OK);
             return response;
         }
 
@@ -474,7 +454,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.Device[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/devices"), HttpStatusCode.OK);
+            Entities.Device[] response = await GetMessageReturnResponse<Entities.Device[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/devices"), HttpStatusCode.OK);
             return response;
         }
 
@@ -487,7 +467,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.MobileDevice.Item[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/mobileDevices"), HttpStatusCode.OK);
+            Entities.MobileDevice.Item[] response = await GetMessageReturnResponse<Entities.MobileDevice.Item[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/mobileDevices"), HttpStatusCode.OK);
             return response;
         }
 
@@ -501,7 +481,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.MobileDevice.Settings>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/mobileDevices/{mobileDeviceId}/settings"), HttpStatusCode.OK);
+            Entities.MobileDevice.Settings response = await GetMessageReturnResponse<Entities.MobileDevice.Settings>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/mobileDevices/{mobileDeviceId}/settings"), HttpStatusCode.OK);
             return response;
         }
 
@@ -514,7 +494,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.Installation[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/installations"), HttpStatusCode.OK);
+            Entities.Installation[] response = await GetMessageReturnResponse<Entities.Installation[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/installations"), HttpStatusCode.OK);
             return response;
         }
 
@@ -527,7 +507,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.HomeState>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/state"), HttpStatusCode.OK);
+            Entities.HomeState response = await GetMessageReturnResponse<Entities.HomeState>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/state"), HttpStatusCode.OK);
             return response;
         }
 
@@ -541,7 +521,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.State>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/state"), HttpStatusCode.OK);
+            Entities.State response = await GetMessageReturnResponse<Entities.State>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/state"), HttpStatusCode.OK);
             return response;
         }
 
@@ -582,7 +562,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.ZoneSummary>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/overlay"), HttpStatusCode.OK);
+            Entities.ZoneSummary response = await GetMessageReturnResponse<Entities.ZoneSummary>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/overlay"), HttpStatusCode.OK);
             return response;
         }
 
@@ -595,7 +575,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.Weather>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/weather"), HttpStatusCode.OK);
+            Entities.Weather response = await GetMessageReturnResponse<Entities.Weather>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/weather"), HttpStatusCode.OK);
             return response;
         }
 
@@ -608,7 +588,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.House>(new Uri(TadoApiBaseUrl, $"homes/{homeId}"), HttpStatusCode.OK);
+            Entities.House response = await GetMessageReturnResponse<Entities.House>(new Uri(TadoApiBaseUrl, $"homes/{homeId}"), HttpStatusCode.OK);
             return response;
         }
 
@@ -621,7 +601,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.User[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/users"), HttpStatusCode.OK);
+            Entities.User[] response = await GetMessageReturnResponse<Entities.User[]>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/users"), HttpStatusCode.OK);
             return response;
         }
 
@@ -635,7 +615,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.Capability>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/capabilities"), HttpStatusCode.OK);
+            Entities.Capability response = await GetMessageReturnResponse<Entities.Capability>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/capabilities"), HttpStatusCode.OK);
             return response;
         }
 
@@ -649,7 +629,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.EarlyStart>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/earlyStart"), HttpStatusCode.OK);
+            Entities.EarlyStart response = await GetMessageReturnResponse<Entities.EarlyStart>(new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/earlyStart"), HttpStatusCode.OK);
             return response;
         }
 
@@ -760,7 +740,7 @@ namespace KoenZomers.Tado.Api
             EnsureAuthenticatedSession();
 
             // Define the proper command for the provided duration mode
-            var overlay = new Entities.Overlay
+            Entities.Overlay overlay = new()
             {
                 Setting = new Entities.Setting
                 {
@@ -790,9 +770,9 @@ namespace KoenZomers.Tado.Api
                 overlay.Termination.DurationInSeconds = (int)timer.Value.TotalSeconds;
             }
 
-            var request = JsonConvert.SerializeObject(overlay);
+            string request = JsonSerializer.Serialize(overlay);
 
-            var response = await SendMessageReturnResponse<Entities.ZoneSummary>(request, HttpMethod.Put, new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/overlay"), HttpStatusCode.OK);
+            Entities.ZoneSummary response = await SendMessageReturnResponse<Entities.ZoneSummary>(request, HttpMethod.Put, new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/overlay"), HttpStatusCode.OK);
             return response;
         }
 
@@ -886,7 +866,7 @@ namespace KoenZomers.Tado.Api
             EnsureAuthenticatedSession();
             Helpers.EnumValidation.EnsureEnumWithinRange(presence);
 
-            var request = JsonConvert.SerializeObject(new { homePresence = presence.ToString().ToUpperInvariant() });
+            string request = JsonSerializer.Serialize(new { homePresence = presence.ToString().ToUpperInvariant() });
 
             return await SendMessage(request, HttpMethod.Put, new Uri(TadoApiBaseUrl, $"homes/{homeId}/presenceLock"), HttpStatusCode.NoContent);
         }
@@ -914,13 +894,13 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var earlyStart = new Entities.EarlyStart
+            Entities.EarlyStart earlyStart = new()
             {
                 Enabled = enabled
             };
-            var request = JsonConvert.SerializeObject(earlyStart);
+            string request = JsonSerializer.Serialize(earlyStart);
 
-            var response = await SendMessageReturnResponse<Entities.EarlyStart>(request, HttpMethod.Put, new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/earlyStart"), HttpStatusCode.OK);
+            Entities.EarlyStart response = await SendMessageReturnResponse<Entities.EarlyStart>(request, HttpMethod.Put, new Uri(TadoApiBaseUrl, $"homes/{homeId}/zones/{zoneId}/earlyStart"), HttpStatusCode.OK);
             return response;
         }
 
@@ -933,7 +913,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var success = await SendMessage(null, HttpMethod.Post, new Uri(TadoApiBaseUrl, $"devices/{deviceId}/identify"), HttpStatusCode.OK);
+            bool success = await SendMessage(null, HttpMethod.Post, new Uri(TadoApiBaseUrl, $"devices/{deviceId}/identify"), HttpStatusCode.OK);
             return success;
         }
 
@@ -959,7 +939,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var request = JsonConvert.SerializeObject(new { childLockEnabled = enableChildLock });
+            string request = JsonSerializer.Serialize(new { childLockEnabled = enableChildLock });
 
             return await SendMessage(request, HttpMethod.Put, new Uri(TadoApiBaseUrl, $"devices/{deviceId}/childLock"), HttpStatusCode.NoContent);
         }
@@ -980,7 +960,7 @@ namespace KoenZomers.Tado.Api
 
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.Temperature>(new Uri(TadoApiBaseUrl, $"devices/{deviceId}/temperatureOffset"), HttpStatusCode.OK);
+            Entities.Temperature response = await GetMessageReturnResponse<Entities.Temperature>(new Uri(TadoApiBaseUrl, $"devices/{deviceId}/temperatureOffset"), HttpStatusCode.OK);
             return response;
         }
 
@@ -991,14 +971,11 @@ namespace KoenZomers.Tado.Api
         /// <returns>The zone temperature offset in Celcius and Fahrenheit</returns>
         public async Task<Entities.Temperature> GetZoneTemperatureOffset(Entities.Device device)
         {
-            if (device == null)
-            {
-                throw new ArgumentNullException(nameof(device));
-            }
+            ArgumentNullException.ThrowIfNull(device);
 
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.Temperature>(new Uri(TadoApiBaseUrl, $"devices/{device.ShortSerialNo}/temperatureOffset"), HttpStatusCode.OK);
+            Entities.Temperature response = await GetMessageReturnResponse<Entities.Temperature>(new Uri(TadoApiBaseUrl, $"devices/{device.ShortSerialNo}/temperatureOffset"), HttpStatusCode.OK);
             return response;
         }
 
@@ -1009,10 +986,7 @@ namespace KoenZomers.Tado.Api
         /// <returns>The zone temperature offset in Celcius and Fahrenheit</returns>
         public async Task<Entities.Temperature> GetZoneTemperatureOffset(Entities.Zone zone)
         {
-            if (zone == null)
-            {
-                throw new ArgumentNullException(nameof(zone));
-            }
+            ArgumentNullException.ThrowIfNull(zone);
             if (zone.Devices.Length == 0)
             {
                 throw new ArgumentException("Provided zone has no devices registered to it", nameof(zone));
@@ -1020,7 +994,7 @@ namespace KoenZomers.Tado.Api
 
             EnsureAuthenticatedSession();
 
-            var response = await GetMessageReturnResponse<Entities.Temperature>(new Uri(TadoApiBaseUrl, $"devices/{zone.Devices[0].ShortSerialNo}/temperatureOffset"), HttpStatusCode.OK);
+            Entities.Temperature response = await GetMessageReturnResponse<Entities.Temperature>(new Uri(TadoApiBaseUrl, $"devices/{zone.Devices[0].ShortSerialNo}/temperatureOffset"), HttpStatusCode.OK);
             return response;
         }
 
@@ -1034,7 +1008,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var request = JsonConvert.SerializeObject(new { celsius = temperature });
+            string request = JsonSerializer.Serialize(new { celsius = temperature });
 
             return await SendMessage(request, HttpMethod.Put, new Uri(TadoApiBaseUrl, $"devices/{deviceId}/temperatureOffset"), HttpStatusCode.OK);
         }
@@ -1058,11 +1032,8 @@ namespace KoenZomers.Tado.Api
         /// <returns>Boolean indicating if the request was successful</returns>
         public async Task<bool> SetZoneTemperatureOffsetCelcius(Entities.Zone zone, double temperature)
         {
-            if(zone == null)
-            {
-                throw new ArgumentNullException(nameof(zone));
-            }
-            if(zone.Devices.Length == 0)
+            ArgumentNullException.ThrowIfNull(zone);
+            if (zone.Devices.Length == 0)
             {
                 throw new ArgumentException("Provided zone has no devices registered to it", nameof(zone));
             }
@@ -1080,7 +1051,7 @@ namespace KoenZomers.Tado.Api
         {
             EnsureAuthenticatedSession();
 
-            var request = JsonConvert.SerializeObject(new { fahrenheit = temperature });
+            string request = JsonSerializer.Serialize(new { fahrenheit = temperature });
 
             return await SendMessage(request, HttpMethod.Put, new Uri(TadoApiBaseUrl, $"devices/{deviceId}/temperatureOffset"), HttpStatusCode.OK);
         }
@@ -1104,10 +1075,7 @@ namespace KoenZomers.Tado.Api
         /// <returns>Boolean indicating if the request was successful</returns>
         public async Task<bool> SetZoneTemperatureOffsetFahrenheit(Entities.Zone zone, double temperature)
         {
-            if (zone == null)
-            {
-                throw new ArgumentNullException(nameof(zone));
-            }
+            ArgumentNullException.ThrowIfNull(zone);
             if (zone.Devices.Length == 0)
             {
                 throw new ArgumentException("Provided zone has no devices registered to it", nameof(zone));

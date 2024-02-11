@@ -7,7 +7,7 @@ namespace KoenZomers.Tado.Api.Helpers
 {
     public class QueryStringBuilder
     {
-        private readonly Dictionary<string, string> _parameters = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _parameters = [];
 
         public bool HasKeys
         {
@@ -27,7 +27,7 @@ namespace KoenZomers.Tado.Api.Helpers
         {
             get
             {
-                return _parameters.ContainsKey(key) ? _parameters[key] : null;
+                return _parameters.TryGetValue(key, out string value) ? value : null;
             }
             set
             {
@@ -39,7 +39,7 @@ namespace KoenZomers.Tado.Api.Helpers
         {
             get
             {
-                return _parameters.Keys.ToArray();
+                return [.. _parameters.Keys];
             }
         }
 
@@ -77,18 +77,18 @@ namespace KoenZomers.Tado.Api.Helpers
 
         public override string ToString()
         {
-            var stringBuilder = new StringBuilder();
-            foreach (var keyValuePair in _parameters)
+            StringBuilder stringBuilder = new();
+            foreach (KeyValuePair<string, string> keyValuePair in _parameters)
             {
                 if (stringBuilder.Length == 0)
                 {
-                    var startCharacter = StartCharacter;
+                    char? startCharacter = StartCharacter;
                     if ((startCharacter.HasValue ? startCharacter.GetValueOrDefault() : new int?()).HasValue)
                         stringBuilder.Append(StartCharacter);
                 }
                 if (stringBuilder.Length > 0)
                 {
-                    int num = stringBuilder[stringBuilder.Length - 1];
+                    int num = stringBuilder[^1];
                     char? startCharacter = StartCharacter;
                     if ((num != (int)startCharacter.GetValueOrDefault() ? 1 : (!startCharacter.HasValue ? 1 : 0)) != 0)
                         stringBuilder.Append(SeperatorCharacter);

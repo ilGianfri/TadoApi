@@ -41,10 +41,10 @@ namespace KoenZomers.Tado.Api.UnitTest
         public async Task SetHeatingTemperatureCelciusTest()
         {
             // Get the current settings in the zone so we can set it back again
-            var zone = await session.GetSummarizedZoneState(HomeId, ZoneId);
+            Entities.ZoneSummary zone = await session.GetSummarizedZoneState(HomeId, ZoneId);
 
             // Test setting the zone heating temperature to another temperature
-            var response = await session.SetHeatingTemperatureCelsius(HomeId, ZoneId, 5.5);
+            Entities.ZoneSummary response = await session.SetHeatingTemperatureCelsius(HomeId, ZoneId, 5.5);
             Assert.IsNotNull(response, "Failed to set the temperature of a zone");
 
             if (zone.Setting.Temperature.Celsius.HasValue)
@@ -61,10 +61,10 @@ namespace KoenZomers.Tado.Api.UnitTest
         public async Task SetHeatingTemperatureFahrenheitTest()
         {
             // Get the current settings in the zone so we can set it back again
-            var zone = await session.GetSummarizedZoneState(HomeId, ZoneId);
+            Entities.ZoneSummary zone = await session.GetSummarizedZoneState(HomeId, ZoneId);
 
             // Test setting the zone heating temperature to another temperature
-            var response = await session.SetHeatingTemperatureFahrenheit(HomeId, ZoneId, 42);
+            Entities.ZoneSummary response = await session.SetHeatingTemperatureFahrenheit(HomeId, ZoneId, 42);
             Assert.IsNotNull(response, "Failed to set the temperature of a zone");
 
             if (zone.Setting.Temperature.Fahrenheit.HasValue)
@@ -81,7 +81,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         public async Task SwitchHeatingOffTest()
         {
             // Get the current settings in the zone so we can set it back again
-            var zone = await session.GetSummarizedZoneState(HomeId, ZoneId);
+            Entities.ZoneSummary zone = await session.GetSummarizedZoneState(HomeId, ZoneId);
 
             Entities.ZoneSummary response;
             if(zone.Setting.Power == Enums.PowerStates.On)
@@ -112,10 +112,10 @@ namespace KoenZomers.Tado.Api.UnitTest
         public async Task SetEarlyStartTest()
         {
             // Get the current settings in the zone so we can set it back again
-            var earlyStart = await session.GetEarlyStart(HomeId, ZoneId);
+            Entities.EarlyStart earlyStart = await session.GetEarlyStart(HomeId, ZoneId);
 
             // Switch the EarlyStart setting
-            var response = await session.SetEarlyStart(HomeId, ZoneId, !earlyStart.Enabled);
+            Entities.EarlyStart response = await session.SetEarlyStart(HomeId, ZoneId, !earlyStart.Enabled);
             Assert.IsNotNull(response, "Failed to switch the EarlyStart setting of a zone");
 
             // Switch the EarlyStart setting back to its initial value
@@ -128,7 +128,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task SayHiTest()
         {
-            var success = await session.SayHi(DeviceId);
+            bool success = await session.SayHi(DeviceId);
             Assert.IsTrue(success, "Failed to display Hi on a Tado device");
         }
 
@@ -139,10 +139,10 @@ namespace KoenZomers.Tado.Api.UnitTest
         public async Task SetHotWaterTemperatureFahrenheitTest()
         {
             // Get the current settings in the zone so we can set it back again. Assuming that hot water is always zone 0. Have yet to verify this.
-            var zone = await session.GetSummarizedZoneState(HomeId, 0);
+            Entities.ZoneSummary zone = await session.GetSummarizedZoneState(HomeId, 0);
 
             // Test setting the hot water boiler temperature to another temperature
-            var response = await session.SetHotWaterTemperatureFahrenheit(HomeId, 115, Enums.DurationModes.UntilNextManualChange);
+            Entities.ZoneSummary response = await session.SetHotWaterTemperatureFahrenheit(HomeId, 115, Enums.DurationModes.UntilNextManualChange);
             Assert.IsNotNull(response, "Failed to set the temperature of the hot water boiler");
 
             if (zone.Setting.Power == Enums.PowerStates.On)
@@ -164,10 +164,10 @@ namespace KoenZomers.Tado.Api.UnitTest
         public async Task SetHotWaterTemperatureCelciusTest()
         {
             // Get the current settings in the zone so we can set it back again. Assuming that hot water is always zone 0. Have yet to verify this.
-            var zone = await session.GetSummarizedZoneState(HomeId, 0);
+            Entities.ZoneSummary zone = await session.GetSummarizedZoneState(HomeId, 0);
 
             // Test setting the hot water boiler temperature to another temperature
-            var response = await session.SetHotWaterTemperatureCelcius(HomeId, 45, Enums.DurationModes.UntilNextManualChange);
+            Entities.ZoneSummary response = await session.SetHotWaterTemperatureCelcius(HomeId, 45, Enums.DurationModes.UntilNextManualChange);
             Assert.IsNotNull(response, "Failed to set the temperature of the hot water boiler");
 
             if (zone.Setting.Power == Enums.PowerStates.On)
@@ -189,7 +189,7 @@ namespace KoenZomers.Tado.Api.UnitTest
         public async Task SwitchHotWaterOffTest()
         {
             // Get the current settings in the zone so we can set it back again. Assuming that hot water is always zone 0. Have yet to verify this.
-            var zone = await session.GetSummarizedZoneState(HomeId, 0);
+            Entities.ZoneSummary zone = await session.GetSummarizedZoneState(HomeId, 0);
 
             Entities.ZoneSummary response;
             if (zone.Setting.Power == Enums.PowerStates.On)
@@ -228,14 +228,14 @@ namespace KoenZomers.Tado.Api.UnitTest
         public async Task SetZoneTemperatureOffsetInCelciusTest()
         {
             // Get the zones
-            var zones = await session.GetZones(HomeId);
+            Entities.Zone[] zones = await session.GetZones(HomeId);
 
             if (zones == null || zones.Length == 0 || zones[0].Devices == null | zones[0].Devices.Length == 0)
             {
                 Assert.Inconclusive("Test inconclusive as the test data is not valid");
             }
 
-            var zone = zones.FirstOrDefault(z => z.Id == ZoneId);
+            Entities.Zone zone = zones.FirstOrDefault(z => z.Id == ZoneId);
 
             if(zone == null)
             {
@@ -243,10 +243,10 @@ namespace KoenZomers.Tado.Api.UnitTest
             }
 
             // Get the currently set offset
-            var currentOffset = await session.GetZoneTemperatureOffset(zone.Devices[0]);
+            Entities.Temperature currentOffset = await session.GetZoneTemperatureOffset(zone.Devices[0]);
 
             // Test setting the offset of the first zone
-            var response = await session.SetZoneTemperatureOffsetCelcius(zone.Devices[0], 1);
+            bool response = await session.SetZoneTemperatureOffsetCelcius(zone.Devices[0], 1);
             Assert.IsNotNull(response, "Failed to set the offset temperature of a zone");
 
             if (currentOffset != null)
@@ -263,14 +263,14 @@ namespace KoenZomers.Tado.Api.UnitTest
         public async Task SetZoneTemperatureOffsetInFahrenheit()
         {
             // Get the zones
-            var zones = await session.GetZones(HomeId);
+            Entities.Zone[] zones = await session.GetZones(HomeId);
 
             if (zones == null || zones.Length == 0 || zones[0].Devices == null | zones[0].Devices.Length == 0)
             {
                 Assert.Inconclusive("Test inconclusive as the test data is not valid");
             }
 
-            var zone = zones.FirstOrDefault(z => z.Id == ZoneId);
+            Entities.Zone zone = zones.FirstOrDefault(z => z.Id == ZoneId);
 
             if (zone == null)
             {
@@ -278,10 +278,10 @@ namespace KoenZomers.Tado.Api.UnitTest
             }
 
             // Get the currently set offset
-            var currentOffset = await session.GetZoneTemperatureOffset(zone.Devices[0]);
+            Entities.Temperature currentOffset = await session.GetZoneTemperatureOffset(zone.Devices[0]);
 
             // Test setting the offset of the first zone
-            var response = await session.SetZoneTemperatureOffsetFahrenheit(zone.Devices[0], 1.8);
+            bool response = await session.SetZoneTemperatureOffsetFahrenheit(zone.Devices[0], 1.8);
             Assert.IsNotNull(response, "Failed to set the offset temperature of a zone");
 
             if (currentOffset != null)
@@ -297,14 +297,14 @@ namespace KoenZomers.Tado.Api.UnitTest
         [TestMethod]
         public async Task SetChildLockEnabled()
         {
-            var devices = await session.GetDevices(HomeId);
+            Entities.Device[] devices = await session.GetDevices(HomeId);
 
             if (devices == null || devices.Length == 0)
             {
                 Assert.Inconclusive("Test inconclusive as the test data is not valid");
             }
 
-            var device = devices.FirstOrDefault(d => d.ShortSerialNo == DeviceId);
+            Entities.Device device = devices.FirstOrDefault(d => d.ShortSerialNo == DeviceId);
 
             if (device == null)
             {
@@ -316,12 +316,12 @@ namespace KoenZomers.Tado.Api.UnitTest
                 Assert.Inconclusive("Test inconclusive as the test device does not have childlock functionality");
             }
 
-            var currentChildLockState = device.ChildLockEnabled.Value;
+            bool currentChildLockState = device.ChildLockEnabled.Value;
 
-            var response1 = await session.SetDeviceChildLock(device, !currentChildLockState);
+            bool response1 = await session.SetDeviceChildLock(device, !currentChildLockState);
             Assert.IsTrue(response1, "Failed to flip the child lock setting");
 
-            var response2 = await session.SetDeviceChildLock(device, currentChildLockState);
+            bool response2 = await session.SetDeviceChildLock(device, currentChildLockState);
             Assert.IsTrue(response2, "Failed to return the child lock to its initial value");
         }
     }

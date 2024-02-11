@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities.MobileDevice
 {
@@ -7,16 +7,16 @@ namespace KoenZomers.Tado.Api.Entities.MobileDevice
     /// </summary>
     public class Location
     {
-        [JsonProperty("stale")]
+        [JsonPropertyName("stale")]
         public bool Stale { get; set; }
 
-        [JsonProperty("atHome")]
+        [JsonPropertyName("atHome")]
         public bool AtHome { get; set; }
 
-        [JsonProperty("bearingFromHome")]
+        [JsonPropertyName("bearingFromHome")]
         public BearingFromHome BearingFromHome { get; set; }
 
-        [JsonProperty("relativeDistanceFromHomeFence")]
+        [JsonPropertyName("relativeDistanceFromHomeFence")]
         public long RelativeDistanceFromHomeFence { get; set; }
     }
 }

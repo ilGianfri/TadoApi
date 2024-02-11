@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,19 +7,19 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public class Installation
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string CurrentType { get; set; }
 
-        [JsonProperty("revision")]
+        [JsonPropertyName("revision")]
         public long Revision { get; set; }
 
-        [JsonProperty("state")]
+        [JsonPropertyName("state")]
         public string State { get; set; }
 
-        [JsonProperty("devices")]
+        [JsonPropertyName("devices")]
         public Device[] Devices { get; set; }
     }
 }

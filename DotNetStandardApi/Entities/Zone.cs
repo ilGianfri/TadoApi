@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,37 +7,37 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public class Zone
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string CurrentType { get; set; }
 
-        [JsonProperty("dateCreated")]
+        [JsonPropertyName("dateCreated")]
         public System.DateTime DateCreated { get; set; }
 
-        [JsonProperty("deviceTypes")]
+        [JsonPropertyName("deviceTypes")]
         public string[] DeviceTypes { get; set; }
 
-        [JsonProperty("devices")]
+        [JsonPropertyName("devices")]
         public Device[] Devices { get; set; }
 
-        [JsonProperty("reportAvailable")]
+        [JsonPropertyName("reportAvailable")]
         public bool ReportAvailable { get; set; }
 
-        [JsonProperty("supportsDazzle")]
+        [JsonPropertyName("supportsDazzle")]
         public bool SupportsDazzle { get; set; }
 
-        [JsonProperty("dazzleEnabled")]
+        [JsonPropertyName("dazzleEnabled")]
         public bool DazzleEnabled { get; set; }
 
-        [JsonProperty("dazzleMode")]
+        [JsonPropertyName("dazzleMode")]
         public DazzleMode DazzleMode { get; set; }
 
-        [JsonProperty("openWindowDetection")]
+        [JsonPropertyName("openWindowDetection")]
         public OpenWindowDetection OpenWindowDetection { get; set; }
     }
 }

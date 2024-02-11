@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using System;
 
 namespace KoenZomers.Tado.Api.Entities
@@ -8,11 +8,11 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public class Session
     {
-        [JsonProperty(PropertyName = "access_token")]
+        [JsonPropertyName("access_token")]
         public string AccessToken { get; set; }
 
         private int? expiresIn;
-        [JsonProperty(PropertyName = "expires_in")]
+        [JsonPropertyName("expires_in")]
         public int? ExpiresIn
         {
             get { return expiresIn; }
@@ -28,16 +28,16 @@ namespace KoenZomers.Tado.Api.Entities
         /// </summary>
         public DateTime? Expires { get; private set; }
 
-        [JsonProperty(PropertyName = "jti")]
+        [JsonPropertyName("jti")]
         public string Jti { get; set; }
 
-        [JsonProperty(PropertyName = "refresh_token")]
+        [JsonPropertyName("refresh_token")]
         public string RefreshToken { get; set; }
 
-        [JsonProperty(PropertyName = "scope")]
+        [JsonPropertyName("scope")]
         public string Scope { get; set; }
 
-        [JsonProperty(PropertyName = "token_type")]
+        [JsonPropertyName("token_type")]
         public string TokenType { get; set; }
     }
 }

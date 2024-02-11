@@ -1,16 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
     public partial class WeatherState
     {
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string CurrentType { get; set; }
 
-        [JsonProperty("value")]
+        [JsonPropertyName("value")]
         public string Value { get; set; }
 
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public System.DateTime Timestamp { get; set; }
     }
 }

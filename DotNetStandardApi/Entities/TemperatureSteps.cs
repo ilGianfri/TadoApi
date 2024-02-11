@@ -1,16 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
     public class TemperatureSteps
     {
-        [JsonProperty("min")]
+        [JsonPropertyName("min")]
         public long Min { get; set; }
 
-        [JsonProperty("max")]
+        [JsonPropertyName("max")]
         public long Max { get; set; }
 
-        [JsonProperty("step")]
+        [JsonPropertyName("step")]
         public long Step { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 # Tado API
-This library compiled for .NET Standard 2.0 will allow you to easily communicate with the Tado API and retrieve details about your Tado thermostats and zones and set their temperature.
+This library compiled for .NET 8 will allow you to easily communicate with the Tado API and retrieve details about your Tado thermostats and zones and set their temperature.
 
 ## Version History
 

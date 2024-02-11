@@ -1,16 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
     public class HeatingPower
     {
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string CurrentType { get; set; }
 
-        [JsonProperty("percentage")]
+        [JsonPropertyName("percentage")]
         public long Percentage { get; set; }
 
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public System.DateTime Timestamp { get; set; }
     }
 }

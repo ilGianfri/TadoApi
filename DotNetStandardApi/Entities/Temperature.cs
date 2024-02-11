@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -10,13 +10,15 @@ namespace KoenZomers.Tado.Api.Entities
         /// <summary>
         /// The temperature in degrees Celcius
         /// </summary>
-        [JsonProperty("celsius", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("celsius")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public double? Celsius { get; set; }
 
         /// <summary>
         /// The temperature in degrees Fahrenheit
         /// </summary>
-        [JsonProperty("fahrenheit", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("fahrenheit")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public double? Fahrenheit { get; set; }
     }
 }

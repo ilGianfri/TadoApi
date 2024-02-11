@@ -1,25 +1,25 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
     public partial class Address
     {
-        [JsonProperty("addressLine1")]
+        [JsonPropertyName("addressLine1")]
         public string AddressLine1 { get; set; }
 
-        [JsonProperty("addressLine2")]
+        [JsonPropertyName("addressLine2")]
         public object AddressLine2 { get; set; }
 
-        [JsonProperty("zipCode")]
+        [JsonPropertyName("zipCode")]
         public string ZipCode { get; set; }
 
-        [JsonProperty("city")]
+        [JsonPropertyName("city")]
         public string City { get; set; }
 
-        [JsonProperty("state")]
+        [JsonPropertyName("state")]
         public object State { get; set; }
 
-        [JsonProperty("country")]
+        [JsonPropertyName("country")]
         public string Country { get; set; }
     }
 }

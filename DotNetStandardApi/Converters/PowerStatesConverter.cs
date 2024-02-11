@@ -1,51 +1,52 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Converters
 {
     /// <summary>
     /// Converts the power state returned by the Tado API to the PowerStates enumerator in this project
     /// </summary>
-    public class PowerStatesConverter : JsonConverter
+    [JsonConverter(typeof(PowerStatesConverter))]
+    public enum PowerStates
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        On,
+        Off
+    }
+
+    public class PowerStatesConverter : JsonConverter<PowerStates>
+    {
+        public override PowerStates Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            Enums.PowerStates powerState = (Enums.PowerStates)value;
+            string enumString = reader.GetString();
 
-            switch (powerState)
-            {
-                case Enums.PowerStates.On:
-                    writer.WriteValue("ON");
-                    break;
-
-                case Enums.PowerStates.Off:
-                    writer.WriteValue("OFF");
-                    break;
-            }
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            var enumString = reader.Value.ToString();
-
-            Enums.PowerStates? powerState = null;
-            switch(enumString)
+            PowerStates? powerState = null;
+            switch (enumString)
             {
                 case "ON":
-                    powerState = Enums.PowerStates.On;
+                    powerState = PowerStates.On;
                     break;
 
                 case "OFF":
-                    powerState = Enums.PowerStates.Off;
+                    powerState = PowerStates.Off;
                     break;
             }
 
-            return powerState;
+            return powerState ?? throw new JsonException($"Invalid power state: {enumString}");
         }
 
-        public override bool CanConvert(Type objectType)
+        public override void Write(Utf8JsonWriter writer, PowerStates value, JsonSerializerOptions options)
         {
-            return objectType == typeof(string);
+            switch (value)
+            {
+                case PowerStates.On:
+                    writer.WriteStringValue("ON");
+                    break;
+
+                case PowerStates.Off:
+                    writer.WriteStringValue("OFF");
+                    break;
+            }
         }
     }
 }

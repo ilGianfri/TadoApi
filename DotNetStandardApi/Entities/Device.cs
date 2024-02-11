@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,37 +7,37 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public class Device
     {
-        [JsonProperty("deviceType")]
+        [JsonPropertyName("deviceType")]
         public string DeviceType { get; set; }
 
-        [JsonProperty("serialNo")]
+        [JsonPropertyName("serialNo")]
         public string SerialNo { get; set; }
 
-        [JsonProperty("shortSerialNo")]
+        [JsonPropertyName("shortSerialNo")]
         public string ShortSerialNo { get; set; }
 
-        [JsonProperty("currentFwVersion")]
+        [JsonPropertyName("currentFwVersion")]
         public string CurrentFwVersion { get; set; }
 
-        [JsonProperty("connectionState")]
+        [JsonPropertyName("connectionState")]
         public ConnectionState ConnectionState { get; set; }
 
-        [JsonProperty("characteristics")]
+        [JsonPropertyName("characteristics")]
         public Characteristics Characteristics { get; set; }
 
-        [JsonProperty("duties")]
+        [JsonPropertyName("duties")]
         public string[] Duties { get; set; }
 
-        [JsonProperty("mountingState")]
+        [JsonPropertyName("mountingState")]
         public MountingState MountingState { get; set; }
 
-        [JsonProperty("batteryState")]
+        [JsonPropertyName("batteryState")]
         public string BatteryState { get; set; }
         
         /// <summary>
         /// Indicates if child lock is enabled or disabled on the Tado device
         /// </summary>
-        [JsonProperty("childLockEnabled")]
+        [JsonPropertyName("childLockEnabled")]
         public bool? ChildLockEnabled { get; set; }
     }
 }

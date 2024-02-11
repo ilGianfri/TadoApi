@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using System;
 
 namespace KoenZomers.Tado.Api.Entities
@@ -11,26 +11,29 @@ namespace KoenZomers.Tado.Api.Entities
         /// <summary>
         /// Defines if and what will make the Tado device change its state
         /// </summary>
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         [JsonConverter(typeof(Converters.DurationModeConverter))]
         public Enums.DurationModes? CurrentType { get; set; }
 
         /// <summary>
         /// Date and time at which the termination mode is expected to change. NULL if CurrentType is Manual thus impossible to predict when the next state change will be.
         /// </summary>
-        [JsonProperty("projectedExpiry", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("projectedExpiry")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public DateTime? ProjectedExpiry { get; set; }
 
         /// <summary>
         /// Date and time at which the termination mode will change. NULL if CurrentType is Manual thus impossible to predict when the next state change will be.
         /// </summary>
-        [JsonProperty("expiry", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("expiry")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public DateTime? Expiry { get; set; }
 
         /// <summary>
         /// Amount of seconds remaining before the Tado device will change its state. Will only contain a value if CurrentType is Timer.
         /// </summary>
-        [JsonProperty("durationInSeconds", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("durationInSeconds")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? DurationInSeconds { get; set; }
     }
 }

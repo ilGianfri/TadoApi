@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,10 +7,10 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public partial class ConnectionState
     {
-        [JsonProperty("value")]
+        [JsonPropertyName("value")]
         public bool Value { get; set; }
 
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public System.DateTime Timestamp { get; set; }
     }
 }

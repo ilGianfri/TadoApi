@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,13 +7,13 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public partial class OpenWindowDetection
     {
-        [JsonProperty("supported")]
+        [JsonPropertyName("supported")]
         public bool Supported { get; set; }
 
-        [JsonProperty("enabled")]
+        [JsonPropertyName("enabled")]
         public bool? Enabled { get; set; }
 
-        [JsonProperty("timeoutInSeconds")]
+        [JsonPropertyName("timeoutInSeconds")]
         public long? TimeoutInSeconds { get; set; }
     }
 }

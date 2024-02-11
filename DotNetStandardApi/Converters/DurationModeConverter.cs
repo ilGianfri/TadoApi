@@ -1,59 +1,61 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Converters
 {
     /// <summary>
     /// Converts the duration mode type returned by the Tado API to the DurationModes enumerator in this project
     /// </summary>
-    public class DurationModeConverter : JsonConverter
+    [JsonConverter(typeof(DurationModeConverter))]
+    public enum DurationModes
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        UntilNextManualChange,
+        UntilNextTimedEvent,
+        Timer
+    }
+
+    public class DurationModeConverter : JsonConverter<DurationModes>
+    {
+        public override DurationModes Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            Enums.DurationModes durationMode = (Enums.DurationModes)value;
+            string enumString = reader.GetString();
 
-            switch (durationMode)
-            {
-                case Enums.DurationModes.UntilNextManualChange:
-                    writer.WriteValue("MANUAL");
-                    break;
-
-                case Enums.DurationModes.UntilNextTimedEvent:
-                    writer.WriteValue("TADO_MODE");
-                    break;
-
-                case Enums.DurationModes.Timer:
-                    writer.WriteValue("TIMER");
-                    break;
-            }
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            var enumString = reader.Value.ToString();
-
-            Enums.DurationModes? durationMode = null;
-            switch(enumString)
+            DurationModes? durationMode = null;
+            switch (enumString)
             {
                 case "MANUAL":
-                    durationMode = Enums.DurationModes.UntilNextManualChange;
+                    durationMode = DurationModes.UntilNextManualChange;
                     break;
 
                 case "TADO_MODE":
-                    durationMode = Enums.DurationModes.UntilNextTimedEvent;
+                    durationMode = DurationModes.UntilNextTimedEvent;
                     break;
 
                 case "TIMER":
-                    durationMode = Enums.DurationModes.Timer;
+                    durationMode = DurationModes.Timer;
                     break;
             }
 
-            return durationMode;
+            return durationMode ?? throw new JsonException($"Invalid duration mode: {enumString}");
         }
 
-        public override bool CanConvert(Type objectType)
+        public override void Write(Utf8JsonWriter writer, DurationModes value, JsonSerializerOptions options)
         {
-            return objectType == typeof(string);
+            switch (value)
+            {
+                case DurationModes.UntilNextManualChange:
+                    writer.WriteStringValue("MANUAL");
+                    break;
+
+                case DurationModes.UntilNextTimedEvent:
+                    writer.WriteStringValue("TADO_MODE");
+                    break;
+
+                case DurationModes.Timer:
+                    writer.WriteStringValue("TIMER");
+                    break;
+            }
         }
     }
 }

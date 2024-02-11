@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,13 +7,13 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public partial class Humidity
     {
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string CurrentType { get; set; }
 
-        [JsonProperty("percentage")]
+        [JsonPropertyName("percentage")]
         public double Percentage { get; set; }
 
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public System.DateTime Timestamp { get; set; }
     }
 }

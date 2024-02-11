@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
     public class Capability
     {
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string PurpleType { get; set; }
 
-        [JsonProperty("temperatures")]
+        [JsonPropertyName("temperatures")]
         public Temperatures Temperatures { get; set; }
     }
 }

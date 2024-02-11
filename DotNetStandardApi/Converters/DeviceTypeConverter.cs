@@ -1,35 +1,34 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Converters
 {
     /// <summary>
     /// Converts the Tado device type returned by the Tado API to the DeviceTypes enumerator in this project
     /// </summary>
-    public class DeviceTypeConverter : JsonConverter
+    public class DeviceTypeConverter : JsonConverter<Enums.DeviceTypes>
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, Enums.DeviceTypes value, JsonSerializerOptions options)
         {
-            Enums.DeviceTypes terminationType = (Enums.DeviceTypes)value;
-
-            switch (terminationType)
+            switch (value)
             {
                 case Enums.DeviceTypes.Heating:
-                    writer.WriteValue("HEATING");
+                    writer.WriteStringValue("HEATING");
                     break;
 
                 case Enums.DeviceTypes.HotWater:
-                    writer.WriteValue("HOT_WATER");
+                    writer.WriteStringValue("HOT_WATER");
                     break;
             }
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override Enums.DeviceTypes Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var enumString = reader.Value.ToString();
+            string enumString = reader.GetString();
 
             Enums.DeviceTypes? terminationType = null;
-            switch(enumString)
+            switch (enumString)
             {
                 case "HEATING":
                     terminationType = Enums.DeviceTypes.Heating;
@@ -40,12 +39,7 @@ namespace KoenZomers.Tado.Api.Converters
                     break;
             }
 
-            return terminationType;
-        }
-
-        public override bool CanConvert(Type objectType)
-        {
-            return objectType == typeof(string);
+            return terminationType ?? throw new JsonException();
         }
     }
 }

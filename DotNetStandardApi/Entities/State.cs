@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,40 +7,40 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public class State
     {
-        [JsonProperty("tadoMode")]
+        [JsonPropertyName("tadoMode")]
         public string TadoMode { get; set; }
 
-        [JsonProperty("geolocationOverride")]
+        [JsonPropertyName("geolocationOverride")]
         public bool GeolocationOverride { get; set; }
 
-        [JsonProperty("geolocationOverrideDisableTime")]
+        [JsonPropertyName("geolocationOverrideDisableTime")]
         public object GeolocationOverrideDisableTime { get; set; }
 
-        [JsonProperty("preparation")]
+        [JsonPropertyName("preparation")]
         public object Preparation { get; set; }
 
-        [JsonProperty("setting")]
+        [JsonPropertyName("setting")]
         public Setting Setting { get; set; }
 
-        [JsonProperty("overlayType")]
+        [JsonPropertyName("overlayType")]
         public string OverlayType { get; set; }
 
-        [JsonProperty("overlay")]
+        [JsonPropertyName("overlay")]
         public Overlay Overlay { get; set; }
 
-        [JsonProperty("openWindow")]
+        [JsonPropertyName("openWindow")]
         public object OpenWindow { get; set; }
 
-        [JsonProperty("openWindowDetected")]
+        [JsonPropertyName("openWindowDetected")]
         public bool? OpenWindowDetected { get; set; }
 
-        [JsonProperty("link")]
+        [JsonPropertyName("link")]
         public Link Link { get; set; }
 
-        [JsonProperty("activityDataPoints")]
+        [JsonPropertyName("activityDataPoints")]
         public ActivityDataPoints ActivityDataPoints { get; set; }
 
-        [JsonProperty("sensorDataPoints")]
+        [JsonPropertyName("sensorDataPoints")]
         public SensorDataPoints SensorDataPoints { get; set; }
     }
 }

@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
     public partial class Temperatures
     {
-        [JsonProperty("celsius")]
+        [JsonPropertyName("celsius")]
         public TemperatureSteps Celsius { get; set; }
 
-        [JsonProperty("fahrenheit")]
+        [JsonPropertyName("fahrenheit")]
         public TemperatureSteps Fahrenheit { get; set; }
     }
 }

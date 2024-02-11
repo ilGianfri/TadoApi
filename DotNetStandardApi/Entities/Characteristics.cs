@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -7,7 +7,7 @@ namespace KoenZomers.Tado.Api.Entities
     /// </summary>
     public class Characteristics
     {
-        [JsonProperty("capabilities")]
+        [JsonPropertyName("capabilities")]
         public string[] Capabilities { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities.MobileDevice
 {
@@ -7,19 +7,19 @@ namespace KoenZomers.Tado.Api.Entities.MobileDevice
     /// </summary>
     public class Item
     {
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonProperty("settings")]
+        [JsonPropertyName("settings")]
         public Settings Settings { get; set; }
 
-        [JsonProperty("location")]
+        [JsonPropertyName("location")]
         public Location Location { get; set; }
 
-        [JsonProperty("deviceMetadata")]
+        [JsonPropertyName("deviceMetadata")]
         public Details MobileDeviceDetails { get; set; }
     }
 }

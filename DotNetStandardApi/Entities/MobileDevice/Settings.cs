@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities.MobileDevice
 {
@@ -7,7 +7,7 @@ namespace KoenZomers.Tado.Api.Entities.MobileDevice
     /// </summary>
     public class Settings
     {
-        [JsonProperty("geoTrackingEnabled")]
+        [JsonPropertyName("geoTrackingEnabled")]
         public bool GeoTrackingEnabled { get; set; }
     }
 }

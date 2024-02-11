@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using System.Text.Json.Serialization;
 
 namespace KoenZomers.Tado.Api.Entities
 {
@@ -11,21 +10,22 @@ namespace KoenZomers.Tado.Api.Entities
         /// <summary>
         /// Type of Tado device
         /// </summary>
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         [JsonConverter(typeof(Converters.DeviceTypeConverter))]
         public Enums.DeviceTypes? DeviceType { get; set; }
 
         /// <summary>
         /// The powerstate of the Tado device
         /// </summary>
-        [JsonProperty("power")]
+        [JsonPropertyName("power")]
         [JsonConverter(typeof(Converters.PowerStatesConverter))]
         public Enums.PowerStates? Power { get; set; }
 
         /// <summary>
         /// The temperature the Tado device is set to change the zone to
         /// </summary>
-        [JsonProperty("temperature", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("temperature")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public Temperature Temperature { get; set; }
     }
 }
